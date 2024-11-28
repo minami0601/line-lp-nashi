@@ -25,7 +25,7 @@ function App() {
   // データ送信フラグ
   const dataSent = useRef(false);
 
-  const SPREADSHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxeNsvw58DFLJCY5fXpwPVQTdVjmqCz66e6bbQNQGskAumXR21CdKWJUmfGQTXpxOPe/exec';
+  const SPREADSHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxQHna4odgFYi1AT5M2w3ka892-mFmcBxZ38U4BqYi5vDr9Oqfk8V-drV28wtCAPSEw/exec';
 
   const sendData = useCallback(() => {
     if (dataSent.current) return;
@@ -45,8 +45,7 @@ function App() {
       const jsonData = JSON.stringify(data);
 
       if (navigator.sendBeacon) {
-        const blob = new Blob([jsonData], { type: 'application/json' });
-        navigator.sendBeacon(SPREADSHEET_WEBHOOK_URL, blob);
+        navigator.sendBeacon(SPREADSHEET_WEBHOOK_URL, jsonData);
         console.log('データ送信完了 (sendBeacon)');
       } else {
         // Fallback: fetch API を利用
@@ -414,7 +413,7 @@ function App() {
                       2
                     </span>
                     <span className="font-bold text-gray-800">
-                      LINEにられている「申し込む▶︎」をタップしてください
+                      LINEに送られている「申し込む▶︎」をタップしてください
                     </span>
                   </div>
                   <div className="mt-4">
