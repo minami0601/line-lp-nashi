@@ -25,10 +25,9 @@ function App() {
   // データ送信フラグ
   const dataSent = useRef(false);
 
-  // const SPREADSHEET_WEBHOOK_URL = import.meta.env.VITE_SPREADSHEET_WEBHOOK_URL;
   const SPREADSHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxeNsvw58DFLJCY5fXpwPVQTdVjmqCz66e6bbQNQGskAumXR21CdKWJUmfGQTXpxOPe/exec';
 
-  const sendData = useCallback(async () => {
+  const sendData = useCallback(() => {
     if (dataSent.current) return;
 
     const data = {
@@ -43,16 +42,29 @@ function App() {
     };
 
     try {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', SPREADSHEET_WEBHOOK_URL, false);
-      xhr.setRequestHeader('Content-Type', 'application/json');
-      xhr.send(JSON.stringify(data));
+      const jsonData = JSON.stringify(data);
+
+      if (navigator.sendBeacon) {
+        const blob = new Blob([jsonData], { type: 'application/json' });
+        navigator.sendBeacon(SPREADSHEET_WEBHOOK_URL, blob);
+        console.log('データ送信完了 (sendBeacon)');
+      } else {
+        // Fallback: fetch API を利用
+        fetch(SPREADSHEET_WEBHOOK_URL, {
+          method: 'POST',
+          mode: 'no-cors',
+          headers: { 'Content-Type': 'application/json' },
+          body: jsonData,
+        });
+        console.log('データ送信完了 (fetch fallback)');
+      }
+
       dataSent.current = true;
-      console.log('データ送信完了');
     } catch (error) {
       console.error('データ送信エラー:', error);
     }
   }, [scrollPercentage, scrollHeight, clientHeight, scrollTop, playedSeconds, showElement]);
+
 
   const handleCTAClick = () => {
     if (dataSent.current) return;
