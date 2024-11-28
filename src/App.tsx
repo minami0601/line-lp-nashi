@@ -64,6 +64,7 @@ function App() {
       scrollTop,
       playedSeconds,
       showElement,
+      userAgent: navigator.userAgent,
     });
 
     fetch(SPREADSHEET_WEBHOOK_URL, {
@@ -161,7 +162,7 @@ function App() {
               この動画は
               <br />
               <span className="text-3xl sm:text-4xl font-extrabold underline text-yellow-500">
-                48時間
+                24時間
               </span>
               で見れなくなります
             </h2>

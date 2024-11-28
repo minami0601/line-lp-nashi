@@ -13,9 +13,9 @@ export const Countdown: React.FC<CountdownProps> = ({ onExpire }) => {
       return Math.max(0, endTime - now);
     }
     // Set initial 48 hours countdown
-    const endTime = Date.now() + 48 * 60 * 60 * 1000;
+    const endTime = Date.now() + 24 * 60 * 60 * 1000;
     localStorage.setItem('countdownEndTime', endTime.toString());
-    return 48 * 60 * 60 * 1000;
+    return 24 * 60 * 60 * 1000;
   });
 
   useEffect(() => {
