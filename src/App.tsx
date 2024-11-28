@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Countdown } from './components/Countdown';
 import { VideoPlayer } from './components/VideoPlayer';
 import { CTAButton } from './components/CTAButton';
@@ -28,10 +28,9 @@ function App() {
   const SPREADSHEET_WEBHOOK_URL =
     'https://script.google.com/macros/s/AKfycbwC0X0nT_Oy0GQCx2E0q836u8mC_5D5tHshg1Auf7tbOsxIpdYIuShl86USCoru-7qb/exec';
 
-  const sendData = () => {
-    if (dataSent.current) return; // 二重送信を防ぐ
+  const sendData = useCallback(async () => {
+    if (dataSent.current) return;
 
-    // データ送信
     const data = {
       timestamp: new Date().toISOString(),
       scrollPercentage: Math.round(scrollPercentage),
@@ -40,14 +39,20 @@ function App() {
       scrollTop,
       playedSeconds,
       showElement,
+      userAgent: navigator.userAgent,
     };
 
-    // 非同期リクエストを `sendBeacon` で送信
-    const payload = JSON.stringify(data);
-    navigator.sendBeacon(SPREADSHEET_WEBHOOK_URL, payload);
-    dataSent.current = true; // データ送信済み
-    console.log('データ送信完了');
-  };
+    try {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', SPREADSHEET_WEBHOOK_URL, false);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify(data));
+      dataSent.current = true;
+      console.log('データ送信完了');
+    } catch (error) {
+      console.error('データ送信エラー:', error);
+    }
+  }, [scrollPercentage, scrollHeight, clientHeight, scrollTop, playedSeconds, showElement]);
 
   const handleCTAClick = () => {
     if (dataSent.current) return;
@@ -96,6 +101,10 @@ function App() {
     sendData();
   };
 
+  const handlePageHide = () => {
+    sendData();
+  };
+
   const handleVisibilityChange = () => {
     if (document.visibilityState === 'hidden') {
       sendData();
@@ -109,14 +118,23 @@ function App() {
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     window.addEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handlePageHide);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handlePageHide);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [scrollPercentage, scrollHeight, clientHeight, scrollTop, playedSeconds]);
+  }, [
+    scrollPercentage,
+    scrollHeight,
+    clientHeight,
+    scrollTop,
+    playedSeconds,
+    sendData
+  ]);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -383,7 +401,7 @@ function App() {
                       2
                     </span>
                     <span className="font-bold text-gray-800">
-                      LINEに送られている「申し込む▶︎」をタップしてください
+                      LINEにられている「申し込む▶︎」をタップしてください
                     </span>
                   </div>
                   <div className="mt-4">
