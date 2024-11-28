@@ -26,7 +26,6 @@ function App() {
   const dataSent = useRef(false);
 
   const SPREADSHEET_WEBHOOK_URL = import.meta.env.VITE_SPREADSHEET_WEBHOOK_URL;
-  console.info('SPREADSHEET_WEBHOOK_URL', SPREADSHEET_WEBHOOK_URL);
 
   const sendData = useCallback(async () => {
     if (dataSent.current) return;
