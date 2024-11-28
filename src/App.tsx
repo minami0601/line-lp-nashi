@@ -25,8 +25,8 @@ function App() {
   // データ送信フラグ
   const dataSent = useRef(false);
 
-  const SPREADSHEET_WEBHOOK_URL =
-    'https://script.google.com/macros/s/AKfycbwC0X0nT_Oy0GQCx2E0q836u8mC_5D5tHshg1Auf7tbOsxIpdYIuShl86USCoru-7qb/exec';
+  const SPREADSHEET_WEBHOOK_URL = import.meta.env.VITE_SPREADSHEET_WEBHOOK_URL;
+  console.info('SPREADSHEET_WEBHOOK_URL', SPREADSHEET_WEBHOOK_URL);
 
   const sendData = useCallback(async () => {
     if (dataSent.current) return;
