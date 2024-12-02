@@ -27,10 +27,15 @@ function App() {
 
   const SPREADSHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxQHna4odgFYi1AT5M2w3ka892-mFmcBxZ38U4BqYi5vDr9Oqfk8V-drV28wtCAPSEw/exec';
 
-  const sendData = useCallback(() => {
-    if (dataSent.current) return;
+  const [sessionId] = useState(() => crypto.randomUUID()); // ユニークなセッションID
+  const [startTime] = useState(new Date()); // セッション開始時間
 
+  const MAX_SESSION_DURATION = 20 * 60; // 最大30分（秒単位）
+  const [shouldStopTracking, setShouldStopTracking] = useState(false);
+
+  const sendData = useCallback(() => {
     const data = {
+      sessionId, // セッションIDを追加
       timestamp: new Date().toISOString(),
       scrollPercentage: Math.round(scrollPercentage),
       scrollHeight,
@@ -39,6 +44,7 @@ function App() {
       playedSeconds,
       showElement,
       userAgent: navigator.userAgent,
+      sessionDuration: (new Date().getTime() - startTime.getTime()) / 1000, // セッション時間（秒）
     };
 
     try {
@@ -48,7 +54,6 @@ function App() {
         navigator.sendBeacon(SPREADSHEET_WEBHOOK_URL, jsonData);
         console.log('データ送信完了 (sendBeacon)');
       } else {
-        // Fallback: fetch API を利用
         fetch(SPREADSHEET_WEBHOOK_URL, {
           method: 'POST',
           mode: 'no-cors',
@@ -57,17 +62,59 @@ function App() {
         });
         console.log('データ送信完了 (fetch fallback)');
       }
-
-      dataSent.current = true;
     } catch (error) {
       console.error('データ送信エラー:', error);
     }
-  }, [scrollPercentage, scrollHeight, clientHeight, scrollTop, playedSeconds, showElement]);
+  }, [sessionId, scrollPercentage, scrollHeight, clientHeight, scrollTop, playedSeconds, showElement, startTime]);
 
+  useEffect(() => {
+    // 最初の1分間は10秒ごとに送信
+    const initialInterval = setInterval(() => {
+      const sessionDuration = (new Date().getTime() - startTime.getTime()) / 1000;
+
+      if (sessionDuration > MAX_SESSION_DURATION) {
+        setShouldStopTracking(true);
+        return;
+      }
+
+      if (sessionDuration <= 60) {
+        sendData();
+      }
+    }, 10000);
+
+    // 1分後から30秒ごとに送信
+    const regularInterval = setInterval(() => {
+      const sessionDuration = (new Date().getTime() - startTime.getTime()) / 1000;
+
+      if (sessionDuration > MAX_SESSION_DURATION) {
+        setShouldStopTracking(true);
+        return;
+      }
+
+      if (sessionDuration > 60) {
+        sendData();
+      }
+    }, 30000);
+
+    return () => {
+      clearInterval(initialInterval);
+      clearInterval(regularInterval);
+    };
+  }, [sendData, startTime]);
+
+  // インターバルのクリーンアップ
+  useEffect(() => {
+    if (shouldStopTracking) {
+      // 最後のデータを送信
+      sendData();
+      console.log('トラッキングを終了しました（最大記録時間に到達）');
+    }
+  }, [shouldStopTracking, sendData]);
 
   const handleCTAClick = () => {
     if (dataSent.current) return;
     const body = JSON.stringify({
+      sessionId,
       timestamp: new Date().toISOString(),
       scrollPercentage: Math.round(scrollPercentage),
       scrollHeight,
@@ -76,6 +123,7 @@ function App() {
       playedSeconds,
       showElement,
       userAgent: navigator.userAgent,
+      sessionDuration: (new Date().getTime() - startTime.getTime()) / 1000,
     });
 
     fetch(SPREADSHEET_WEBHOOK_URL, {
@@ -96,32 +144,24 @@ function App() {
     window.open('https://line.me/ti/p/%40952zkzfj', '_blank');
   };
 
-  const handleScroll = () => {
-    const scrollTop = window.scrollY; // 現在のスクロール位置
-    const scrollHeight = document.documentElement.scrollHeight; // ページ全体の高さ
-    const clientHeight = document.documentElement.clientHeight; // ビューポートの高さ
+  const handleVisibilityChange = useCallback(() => {
+    if (document.visibilityState === 'hidden') {
+      sendData();
+    }
+  }, [sendData]);
 
-    const scrolled = (scrollTop / (scrollHeight - clientHeight)) * 100; // スクロール率
+  const handleScroll = useCallback(() => {
+    const scrollTop = window.scrollY;
+    const scrollHeight = document.documentElement.scrollHeight;
+    const clientHeight = document.documentElement.clientHeight;
+
+    const scrolled = (scrollTop / (scrollHeight - clientHeight)) * 100;
 
     setScrollPercentage(scrolled);
     setScrollHeight(scrollHeight);
     setClientHeight(clientHeight);
     setScrollTop(scrollTop);
-  };
-
-  const handleBeforeUnload = () => {
-    sendData();
-  };
-
-  const handlePageHide = () => {
-    sendData();
-  };
-
-  const handleVisibilityChange = () => {
-    if (document.visibilityState === 'hidden') {
-      sendData();
-    }
-  };
+  }, []);
 
   const handleVideoProgress = (seconds: number) => {
     setPlayedSeconds(seconds); // 再生秒数を更新
@@ -129,23 +169,15 @@ function App() {
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    window.addEventListener('pagehide', handlePageHide);
     document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('beforeunload', handleBeforeUnload);
-      window.removeEventListener('pagehide', handlePageHide);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [
-    scrollPercentage,
-    scrollHeight,
-    clientHeight,
-    scrollTop,
-    playedSeconds,
-    sendData
+    handleScroll,
+    handleVisibilityChange
   ]);
 
   return (
