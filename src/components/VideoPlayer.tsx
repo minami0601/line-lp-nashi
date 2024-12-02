@@ -29,7 +29,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
     onProgress(currentTime);
 
     // 特定の秒数に到達した場合の処理
-    if (currentTime >= 645 && !hasReachedTime) {
+    if (currentTime >= 540 && !hasReachedTime) {
       setHasReachedTime(true);
       localStorage.setItem('hasReachedTime', 'true');
       onReachTime();
@@ -51,7 +51,7 @@ export const VideoPlayer: React.FC<VideoPlayerProps> = ({
   return (
     <div className="aspect-video w-full max-w-4xl mx-auto rounded-lg overflow-hidden shadow-lg">
       <ReactPlayer
-        url="https://player.vimeo.com/video/1013011100?h=7a08e3e52f&badge=0&autopause=0&player_id=0&app_id=58479"
+        url="https://player.vimeo.com/video/1035028905?badge=0&autopause=0&player_id=0&app_id=58479"
         width="100%"
         height="100%"
         controls
