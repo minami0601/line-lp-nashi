@@ -25,7 +25,7 @@ function App() {
   // データ送信フラグ
   const dataSent = useRef(false);
 
-  const SPREADSHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbxQHna4odgFYi1AT5M2w3ka892-mFmcBxZ38U4BqYi5vDr9Oqfk8V-drV28wtCAPSEw/exec';
+  const SPREADSHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzTZLsFuo-1rQVUtq3Uk361__o2Hg3zj_EaCLYIq6V-hTUAFJhhwMd8nyX5aYMBEPky/exec';
 
   const [sessionId] = useState(() => crypto.randomUUID()); // ユニークなセッションID
   const [startTime] = useState(new Date()); // セッション開始時間
