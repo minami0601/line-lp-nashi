@@ -141,7 +141,7 @@ function App() {
         console.error('リクエスト送信エラー:', error);
       });
     dataSent.current = true; // データ送信済み
-    window.open('https://line.me/R/oaMessage/@952zkzfj/?12%2F1%2017%3A00~19%3A00%0D%0A12%2F3%2011%3A00~12%3A00%2C%2019%3A00~%0D%0A12%2F10%209%3A%3A00~12%3A00', '_blank');
+    window.open('https://line.me/ti/p/%40952zkzfj', '_blank');
   };
 
   const handleVisibilityChange = useCallback(() => {
