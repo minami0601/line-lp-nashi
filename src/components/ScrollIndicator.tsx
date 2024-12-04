@@ -14,7 +14,7 @@ export const ScrollIndicator: React.FC = () => {
       onClick={handleClick}
       className="flex flex-col items-center mt-8 mb-4 cursor-pointer animate-bounce"
     >
-      <p className="text-4xl text-gray-600 font-bold mb-1">個別コンサルのご案内！</p>
+      <p className="text-3xl text-gray-600 font-bold mb-1">個別コンサルのご案内！</p>
       <p className="text-3xl font-bold">スクロールしてチェック</p>
       <ChevronDown className="w-8 h-8 text-blue-600" />
     </div>
