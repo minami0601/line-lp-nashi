@@ -25,7 +25,7 @@ function App() {
   // データ送信フラグ
   const dataSent = useRef(false);
 
-  const SPREADSHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbzTZLsFuo-1rQVUtq3Uk361__o2Hg3zj_EaCLYIq6V-hTUAFJhhwMd8nyX5aYMBEPky/exec';
+  const SPREADSHEET_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbyRVjS1CTldxIixqRmjGu5E7duM7RKGp9ssKbhKSdKK-0PnHoZKY81Le9kkuAydY7wG/exec';
 
   const [sessionId] = useState(() => crypto.randomUUID()); // ユニークなセッションID
   const [startTime] = useState(new Date()); // セッション開始時間
@@ -45,6 +45,7 @@ function App() {
       showElement,
       userAgent: navigator.userAgent,
       sessionDuration: (new Date().getTime() - startTime.getTime()) / 1000, // セッション時間（秒）
+      action: 'normal'
     };
 
     try {
@@ -124,6 +125,7 @@ function App() {
       showElement,
       userAgent: navigator.userAgent,
       sessionDuration: (new Date().getTime() - startTime.getTime()) / 1000,
+      action: 'cta_click'
     });
 
     fetch(SPREADSHEET_WEBHOOK_URL, {
