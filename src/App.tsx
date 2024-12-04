@@ -450,7 +450,7 @@ function App() {
                   </div>
                   <div className="mt-4">
                     <img
-                      src="https://d27rnpuamwvieu.cloudfront.net/06GxLGMwL8F7hUbdezGYkiwXX/normal"
+                      src="https://d27rnpuamwvieu.cloudfront.net/0L7vIACNzbl2iXSN6aRQWUQXX/normal"
                       alt="Step 2"
                       className="w-full rounded-lg"
                     />
