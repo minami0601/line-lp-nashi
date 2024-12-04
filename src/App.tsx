@@ -30,7 +30,7 @@ function App() {
   const [sessionId] = useState(() => crypto.randomUUID()); // ユニークなセッションID
   const [startTime] = useState(new Date()); // セッション開始時間
 
-  const MAX_SESSION_DURATION = 20 * 60; // 最大30分（秒単位）
+  const MAX_SESSION_DURATION = 30 * 60; // 最大30分（秒単位）
   const [shouldStopTracking, setShouldStopTracking] = useState(false);
 
   const sendData = useCallback(() => {
